@@ -76,78 +76,6 @@
 </head>
 <body class="bg-slate-200 text-slate-900 antialiased selection:bg-brand-500 selection:text-white min-h-screen flex flex-col lg:flex-row items-center justify-center p-0 sm:p-4 lg:gap-10">
 
-    <!-- PANNELLO LATERALE DI SIMULAZIONE (Visibile su Desktop a fianco del telefono, e integrato su Mobile) -->
-    <aside class="hidden lg:flex flex-col w-80 bg-white rounded-3xl p-6 shadow-soft border border-slate-100">
-        <div class="flex items-center gap-3 mb-4">
-            <div class="w-10 h-10 rounded-2xl bg-brand-600 text-white flex items-center justify-center font-bold text-lg shadow-md">
-                💳
-            </div>
-            <div>
-                <h2 class="font-bold text-slate-900 leading-tight">Simulatore Carta</h2>
-                <p class="text-xs text-slate-500">Testa la ricezione in tempo reale</p>
-            </div>
-        </div>
-        <p class="text-xs text-slate-600 mb-4 leading-relaxed">
-            Simula un pagamento contactless o online con la tua carta. Apparirà subito una <strong>notifica push</strong> sul telefono per chiederti cosa hai comprato.
-        </p>
-
-        <div class="space-y-2.5 mb-5">
-            <p class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Pagamenti Rapidi</p>
-            <button onclick="triggerCardSimulation('Esselunga', 48.50, 'Spesa & Casa')" class="w-full flex items-center justify-between p-3 rounded-2xl bg-slate-50 hover:bg-brand-50 border border-slate-200/80 hover:border-brand-200 transition text-left group">
-                <div class="flex items-center gap-2.5">
-                    <span class="text-lg">🛒</span>
-                    <div>
-                        <div class="text-sm font-semibold text-slate-800 group-hover:text-brand-700">Esselunga</div>
-                        <div class="text-[11px] text-slate-400">Contactless •••• 4829</div>
-                    </div>
-                </div>
-                <span class="font-bold text-sm text-slate-900">€ 48,50</span>
-            </button>
-
-            <button onclick="triggerCardSimulation('Deliveroo', 24.00, 'Ristoranti & Delivery')" class="w-full flex items-center justify-between p-3 rounded-2xl bg-slate-50 hover:bg-brand-50 border border-slate-200/80 hover:border-brand-200 transition text-left group">
-                <div class="flex items-center gap-2.5">
-                    <span class="text-lg">🍔</span>
-                    <div>
-                        <div class="text-sm font-semibold text-slate-800 group-hover:text-brand-700">Deliveroo</div>
-                        <div class="text-[11px] text-slate-400">Apple Pay •••• 4829</div>
-                    </div>
-                </div>
-                <span class="font-bold text-sm text-slate-900">€ 24,00</span>
-            </button>
-
-            <button onclick="triggerCardSimulation('Eni Station', 35.00, 'Trasporti')" class="w-full flex items-center justify-between p-3 rounded-2xl bg-slate-50 hover:bg-brand-50 border border-slate-200/80 hover:border-brand-200 transition text-left group">
-                <div class="flex items-center gap-2.5">
-                    <span class="text-lg">⛽</span>
-                    <div>
-                        <div class="text-sm font-semibold text-slate-800 group-hover:text-brand-700">Eni Station</div>
-                        <div class="text-[11px] text-slate-400">Contactless •••• 4829</div>
-                    </div>
-                </div>
-                <span class="font-bold text-sm text-slate-900">€ 35,00</span>
-            </button>
-
-            <button onclick="triggerCardSimulation('Amazon.it', 62.90, 'Svago & Shopping')" class="w-full flex items-center justify-between p-3 rounded-2xl bg-slate-50 hover:bg-brand-50 border border-slate-200/80 hover:border-brand-200 transition text-left group">
-                <div class="flex items-center gap-2.5">
-                    <span class="text-lg">📦</span>
-                    <div>
-                        <div class="text-sm font-semibold text-slate-800 group-hover:text-brand-700">Amazon.it</div>
-                        <div class="text-[11px] text-slate-400">Carta Virtuale •••• 9104</div>
-                    </div>
-                </div>
-                <span class="font-bold text-sm text-slate-900">€ 62,90</span>
-            </button>
-        </div>
-
-        <button onclick="triggerRandomTransaction()" class="w-full py-3 px-4 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-sm shadow-md transition flex items-center justify-center gap-2 active:scale-95">
-            <span>⚡</span> Simula Transazione Casuale
-        </button>
-
-        <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
-            <span>Dati salvati in locale</span>
-            <button onclick="resetDemoData()" class="text-rose-500 hover:underline font-medium">Ripristina Demo</button>
-        </div>
-    </aside>
-
     <!-- CORNICE SMARTPHONE (Full-screen su mobile, cornice smartphone centrata su desktop/tablet) -->
     <main class="relative w-full sm:w-[400px] h-[100dvh] sm:h-[820px] bg-slate-50 sm:rounded-[44px] sm:shadow-phone overflow-hidden flex flex-col border-slate-800">
         
@@ -177,16 +105,6 @@
 
         <!-- HEADER APP CON STILE FINTECH SCURO -->
         <header class="bg-slate-900 text-white pt-5 pb-6 px-5 rounded-b-[32px] shadow-md shrink-0 relative z-10">
-            <!-- Status bar simulata su desktop -->
-            <div class="hidden sm:flex justify-between items-center text-[11px] text-slate-400 font-medium mb-3 px-1">
-                <span id="clockDisplay">11:24</span>
-                <div class="w-20 h-4 bg-black rounded-full"></div>
-                <div class="flex items-center gap-1.5">
-                    <span>5G</span>
-                    <span>🔋 94%</span>
-                </div>
-            </div>
-
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2.5">
                     <div class="w-9 h-9 rounded-2xl bg-gradient-to-tr from-brand-600 to-indigo-400 flex items-center justify-center font-extrabold text-lg shadow-inner">
@@ -200,12 +118,6 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Pulsante Simula Transazione visibile anche su Mobile/Tablet -->
-                <button onclick="openSimulatorDrawer()" class="bg-white/10 hover:bg-white/20 active:scale-95 transition text-white text-xs font-semibold px-3 py-2 rounded-2xl border border-white/15 flex items-center gap-1.5">
-                    <span>💳</span>
-                    <span>Simula Carta</span>
-                </button>
             </div>
         </header>
 
@@ -454,50 +366,6 @@
                         Salva Spesa e Aggiorna Analisi
                     </button>
                 </form>
-            </div>
-        </div>
-
-        <!-- ================= MODALE 2: SIMULATORE TRANSAZIONE CARTA (Mobile Drawer) ================= -->
-        <div id="simulatorDrawer" class="hidden absolute inset-0 z-40 bg-slate-900/60 backdrop-blur-xs flex flex-col justify-end">
-            <div class="bg-white rounded-t-[32px] p-6 sheet-enter shadow-2xl">
-                <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-4"></div>
-                <div class="flex items-center justify-between mb-3">
-                    <div>
-                        <h3 class="text-lg font-extrabold text-slate-900">Simula Pagamento Carta</h3>
-                        <p class="text-xs text-slate-500">Scegli un pagamento per testare la notifica push</p>
-                    </div>
-                    <button onclick="closeSimulatorDrawer()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center font-bold">✕</button>
-                </div>
-
-                <div class="grid grid-cols-2 gap-2.5 mb-4">
-                    <button onclick="closeSimulatorDrawer(); triggerCardSimulation('Esselunga', 48.50, 'Spesa & Casa')" class="p-3 rounded-2xl bg-slate-50 hover:bg-brand-50 border border-slate-200 text-left transition">
-                        <div class="text-lg mb-1">🛒</div>
-                        <div class="text-xs font-bold text-slate-900">Esselunga</div>
-                        <div class="text-sm font-extrabold text-brand-600">€ 48,50</div>
-                    </button>
-                    <button onclick="closeSimulatorDrawer(); triggerCardSimulation('Deliveroo', 24.00, 'Ristoranti & Delivery')" class="p-3 rounded-2xl bg-slate-50 hover:bg-brand-50 border border-slate-200 text-left transition">
-                        <div class="text-lg mb-1">🍔</div>
-                        <div class="text-xs font-bold text-slate-900">Deliveroo</div>
-                        <div class="text-sm font-extrabold text-brand-600">€ 24,00</div>
-                    </button>
-                    <button onclick="closeSimulatorDrawer(); triggerCardSimulation('Eni Station', 35.00, 'Trasporti')" class="p-3 rounded-2xl bg-slate-50 hover:bg-brand-50 border border-slate-200 text-left transition">
-                        <div class="text-lg mb-1">⛽</div>
-                        <div class="text-xs font-bold text-slate-900">Eni Station</div>
-                        <div class="text-sm font-extrabold text-brand-600">€ 35,00</div>
-                    </button>
-                    <button onclick="closeSimulatorDrawer(); triggerCardSimulation('Amazon.it', 62.90, 'Svago & Shopping')" class="p-3 rounded-2xl bg-slate-50 hover:bg-brand-50 border border-slate-200 text-left transition">
-                        <div class="text-lg mb-1">📦</div>
-                        <div class="text-xs font-bold text-slate-900">Amazon.it</div>
-                        <div class="text-sm font-extrabold text-brand-600">€ 62,90</div>
-                    </button>
-                </div>
-
-                <button onclick="closeSimulatorDrawer(); triggerRandomTransaction()" class="w-full py-3 rounded-2xl bg-slate-900 text-white font-bold text-sm mb-2">
-                    ⚡ Simula Transazione Casuale
-                </button>
-                <button onclick="closeSimulatorDrawer(); resetDemoData()" class="w-full py-2 text-xs font-semibold text-rose-500">
-                    Ripristina dati iniziali di esempio
-                </button>
             </div>
         </div>
 

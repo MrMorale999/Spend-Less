@@ -51,14 +51,30 @@
             justify-content: center;
             margin: 0 auto;
         }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        @keyframes slideDownNotif {
+            0% { transform: translateY(-130%); opacity: 0; }
+            70% { transform: translateY(6px); opacity: 1; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes slideUpNotif {
+            0% { transform: translateY(0); opacity: 1; }
+            100% { transform: translateY(-130%); opacity: 0; }
+        }
+        .notif-enter { animation: slideDownNotif 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .notif-exit { animation: slideUpNotif 0.3s ease-in forwards; }
+        @keyframes sheetUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+        .sheet-enter { animation: sheetUp 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
     </style>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    },
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
                     colors: {
                         brand: {
                             50: '#eef2ff',
@@ -78,47 +94,12 @@
             }
         }
     </script>
-    <style>
-        /* Stili custom per nascondere scrollbar mantenendo lo scorrimento fluido */
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-        .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-        /* Animazione ingresso notifica push */
-        @keyframes slideDownNotif {
-            0% { transform: translateY(-130%); opacity: 0; }
-            70% { transform: translateY(6px); opacity: 1; }
-            100% { transform: translateY(0); opacity: 1; }
-        }
-        @keyframes slideUpNotif {
-            0% { transform: translateY(0); opacity: 1; }
-            100% { transform: translateY(-130%); opacity: 0; }
-        }
-        .notif-enter {
-            animation: slideDownNotif 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-        .notif-exit {
-            animation: slideUpNotif 0.3s ease-in forwards;
-        }
-        /* Animazione modale dal basso */
-        @keyframes sheetUp {
-            from { transform: translateY(100%); }
-            to { transform: translateY(0); }
-        }
-        .sheet-enter {
-            animation: sheetUp 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-    </style>
 </head>
 <body class="bg-slate-200 text-slate-900 antialiased selection:bg-brand-500 selection:text-white min-h-screen flex flex-col lg:flex-row items-center justify-center p-0 sm:p-4 lg:gap-10">
 
-    <!-- CORNICE SMARTPHONE (Full-screen su mobile, cornice smartphone centrata su desktop/tablet) -->
     <main class="relative w-full sm:w-[400px] h-[100dvh] sm:h-[820px] bg-slate-50 sm:rounded-[44px] sm:shadow-phone overflow-hidden flex flex-col border-slate-800">
         
-        <!-- NOTIFICA PUSH INTERATTIVA IN ARRIVO (Overlay superiore) -->
+        <!-- NOTIFICA PUSH INTERATTIVA IN ARRIVO -->
         <div id="pushNotification" class="hidden absolute top-3 left-3 right-3 z-50 cursor-pointer" onclick="openExpenseModalFromNotif()">
             <div class="bg-slate-900/95 backdrop-blur-md text-white p-3.5 rounded-3xl shadow-notif border border-white/15">
                 <div class="flex items-center justify-between mb-1.5">
@@ -135,26 +116,20 @@
                         </p>
                         <p class="text-xs text-slate-300 mt-0.5">Tocca qui per scrivere cosa hai comprato ✍️</p>
                     </div>
-                    <div class="w-9 h-9 rounded-2xl bg-brand-600 flex items-center justify-center shrink-0 text-sm shadow">
-                        ➔
-                    </div>
+                    <div class="w-9 h-9 rounded-2xl bg-brand-600 flex items-center justify-center shrink-0 text-sm shadow">➔</div>
                 </div>
             </div>
         </div>
 
-        <!-- HEADER APP CON STILE FINTECH SCURO -->
-        <header class="bg-slate-900 text-white pt-8 pb-9 px-5 rounded-b-[32px] shadow-md shrink-0 relative z-10">
+        <!-- HEADER APP -->
+        <header class="bg-slate-900 text-white pt-8 pb-7 px-5 rounded-b-[32px] shadow-md shrink-0 relative z-10">
             <div class="flex items-center justify-center">
-                <div class="flex items-center gap-2.5">
-                    <div>
-                        <h1 class="font-bold text-base tracking-tight leading-none">SpendiSmart</h1>
-                    </div>
-                </div>
+                <h1 class="font-bold text-base tracking-tight leading-none">SpendiSmart</h1>
             </div>
         </header>
 
         <!-- AREA CONTENUTO SCORREVOLE -->
-        <div id="scrollContainer" class="flex-1 overflow-y-auto no-scrollbar px-4 pt-4 pb-24 space-y-4">
+        <div id="scrollContainer" class="flex-1 overflow-y-auto no-scrollbar px-4 pt-4 pb-28 space-y-4">
             
             <!-- ================= TAB 1: PANORAMICA ================= -->
             <section id="tab-panoramica" class="space-y-4">
@@ -170,33 +145,32 @@
                     
                     <div class="flex items-baseline justify-between mt-1">
                         <div class="text-3xl font-extrabold text-slate-900 tracking-tight" id="totalSpentDisplay">€ 0,00</div>
-                        <div class="text-xs font-medium text-slate-500">su <span id="budgetDisplay" class="font-bold text-slate-700">€ 1.200,00</span></div>
+                        <div class="text-xs font-medium text-slate-500">su <span id="budgetDisplay" class="font-bold text-slate-700">€ 800,00</span></div>
                     </div>
 
-                    <!-- Barra di avanzamento Budget -->
                     <div class="w-full h-3 bg-slate-100 rounded-full overflow-hidden mt-3.5 p-0.5">
-                        <div id="budgetProgressBar" class="h-full rounded-full bg-brand-600 transition-all duration-500" style="width: 45%"></div>
+                        <div id="budgetProgressBar" class="h-full rounded-full bg-brand-600 transition-all duration-500" style="width: 0%"></div>
                     </div>
 
                     <div class="flex items-center justify-between mt-2.5 text-xs">
-                        <span id="budgetStatusText" class="font-medium text-emerald-600">Ti restano € 0,00</span>
+                        <span id="budgetStatusText" class="font-medium text-emerald-600">Ti restano € 800,00 disponibili</span>
                         <span id="budgetPercentText" class="font-bold text-slate-700">0%</span>
                     </div>
                 </div>
 
                 <!-- Banner Rapido Consiglio AI -->
-                <div onclick="switchTab('consigli')" class="bg-gradient-to-r from-indigo-600 to-violet-600 rounded-3xl p-4 text-white shadow-md cursor-pointer active:scale-[0.99] transition relative overflow-hidden">
-                    <div class="flex items-start gap-3 relative z-10">
+                <div onclick="switchTab('consigli')" class="bg-gradient-to-r from-indigo-600 to-violet-600 rounded-3xl p-4 text-white shadow-md cursor-pointer active:scale-[0.99] transition">
+                    <div class="flex items-start gap-3">
                         <div class="w-10 h-10 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center text-xl shrink-0">
                             ✨
                         </div>
-                        <div class="bg-gradient-to-r from-purple-600 to-indigo-600 p-4 rounded-2xl text-white shadow-md">
+                        <div class="flex-1 min-w-0">
                             <div class="flex justify-between items-center mb-1">
-                                <span class="text-xs font-semibold uppercase tracking-wider opacity-80">✨ Coach Risparmio AI</span>
-                                <span class="text-xs underline cursor-pointer">Vedi tutti &rarr;</span>
+                                <span class="text-[11px] font-bold uppercase tracking-wider opacity-85">Coach Risparmio AI</span>
+                                <span class="text-xs underline">Vedi tutti &rarr;</span>
                             </div>
-                            <p id="ai-insight-box" class="text-sm opacity-90">
-                                Inizia a registrare le prime spese per sbloccare i consigli personalizzati...
+                            <p id="ai-insight-box" class="text-xs leading-relaxed opacity-95">
+                                Nessuna spesa registrata: i consigli dell'IA appariranno qui non appena inserisci il primo acquisto.
                             </p>
                         </div>
                     </div>
@@ -206,7 +180,7 @@
                 <div class="bg-white rounded-3xl p-5 shadow-soft border border-slate-100">
                     <div class="flex items-center justify-between mb-3">
                         <h2 class="font-bold text-slate-900 text-sm">Dove vanno i tuoi soldi</h2>
-                        <span class="text-[11px] font-medium text-slate-400">Novembre 2026</span>
+                        <span id="currentMonthLabel" class="text-[11px] font-medium text-slate-400">Novembre 2026</span>
                     </div>
                     
                     <div class="flex items-center gap-4">
@@ -217,21 +191,17 @@
                                 <span id="chartCenterPercent" class="text-sm font-extrabold text-slate-800">0%</span>
                             </div>
                         </div>
-                        <div id="chartLegend" class="flex-1 space-y-2 text-xs">
-                            <!-- Popolato dinamicamente via JS -->
-                        </div>
+                        <div id="chartLegend" class="flex-1 space-y-2 text-xs"></div>
                     </div>
                 </div>
 
-                <!-- Ultimi Movimenti (Anteprima) -->
+                <!-- Ultimi Movimenti -->
                 <div class="bg-white rounded-3xl p-5 shadow-soft border border-slate-100">
                     <div class="flex items-center justify-between mb-3">
                         <h2 class="font-bold text-slate-900 text-sm">Ultimi acquisti registrati</h2>
                         <button onclick="switchTab('movimenti')" class="text-xs font-semibold text-brand-600 hover:underline">Tutti</button>
                     </div>
-                    <div id="recentTransactionsList" class="space-y-3">
-                        <!-- Popolato dinamicamente via JS -->
-                    </div>
+                    <div id="recentTransactionsList" class="space-y-3"></div>
                 </div>
 
             </section>
@@ -246,7 +216,6 @@
                     <span id="txCountBadge" class="text-xs font-bold bg-slate-200 text-slate-700 px-2.5 py-1 rounded-xl">0</span>
                 </div>
 
-                <!-- Filtro Categoria -->
                 <div class="flex gap-2 overflow-x-auto no-scrollbar pb-1" id="categoryFilters">
                     <button onclick="setCategoryFilter('Tutte')" data-cat="Tutte" class="filter-chip active px-3.5 py-1.5 rounded-2xl text-xs font-semibold bg-slate-900 text-white shrink-0 transition">Tutte</button>
                     <button onclick="setCategoryFilter('Spesa & Casa')" data-cat="Spesa & Casa" class="filter-chip px-3.5 py-1.5 rounded-2xl text-xs font-semibold bg-white text-slate-600 border border-slate-200 shrink-0 transition">🛒 Spesa</button>
@@ -256,20 +225,23 @@
                     <button onclick="setCategoryFilter('Bollette & Abbonamenti')" data-cat="Bollette & Abbonamenti" class="filter-chip px-3.5 py-1.5 rounded-2xl text-xs font-semibold bg-white text-slate-600 border border-slate-200 shrink-0 transition">📱 Abbonamenti</button>
                 </div>
 
-                <div id="allTransactionsList" class="space-y-3">
-                    <!-- Popolato dinamicamente via JS -->
-                </div>
+                <div id="allTransactionsList" class="space-y-3"></div>
             </section>
 
             <!-- ================= TAB 3: CONSIGLI DI RISPARMIO AI ================= -->
             <section id="tab-consigli" class="hidden space-y-4">
                 <div class="bg-slate-900 text-white rounded-3xl p-5 shadow-md">
-                    <div class="flex items-center gap-2.5 mb-2">
-                        <span class="text-2xl">🧠</span>
-                        <div>
-                            <h2 class="font-extrabold text-base">Coach Risparmio AI</h2>
-                            <p class="text-xs text-slate-400">Analisi in tempo reale sulle tue abitudini</p>
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center gap-2.5">
+                            <span class="text-2xl">🧠</span>
+                            <div>
+                                <h2 class="font-extrabold text-base">Coach Risparmio AI</h2>
+                                <p class="text-xs text-slate-400">Analisi in tempo reale sulle tue abitudini</p>
+                            </div>
                         </div>
+                        <button onclick="aggiornaConsigliGemini(true)" class="text-xs font-semibold bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-xl transition">
+                            Aggiorna ✨
+                        </button>
                     </div>
                     <div class="mt-4 pt-4 border-t border-white/10 flex items-center justify-between">
                         <div>
@@ -283,43 +255,50 @@
                     </div>
                 </div>
 
-                <div id="aiAdviceCardsContainer" class="space-y-3">
-                    <!-- Card dinamiche generate dall'algoritmo di analisi -->
+                <!-- Risposta diretta di Gemini -->
+                <div class="bg-gradient-to-br from-indigo-50 to-violet-50 rounded-3xl p-5 border border-indigo-100">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="text-sm">✨</span>
+                        <h3 class="font-bold text-indigo-950 text-xs uppercase tracking-wider">Analisi Personalizzata Gemini</h3>
+                    </div>
+                    <p id="ai-full-advice" class="text-xs text-slate-700 leading-relaxed whitespace-pre-line">
+                        Inserisci la tua prima spesa per ricevere l'analisi personalizzata dall'intelligenza artificiale.
+                    </p>
                 </div>
+
+                <div id="aiAdviceCardsContainer" class="space-y-3"></div>
             </section>
 
         </div>
 
-        <!-- BARRA DI NAVIGAZIONE INFERIORE + PULSANTE '+' CENTRALE -->
-        <nav class="absolute bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200/80 px-6 py-2.5 flex items-center justify-between z-20">
-            <button onclick="switchTab('panoramica')" id="nav-panoramica" class="nav-btn flex flex-col items-center gap-1 text-brand-600 transition">
+        <!-- BARRA DI NAVIGAZIONE INFERIORE -->
+        <nav class="bottom-nav">
+            <button onclick="switchTab('panoramica')" id="nav-panoramica" class="nav-btn text-brand-600 transition">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-                <span class="text-[11px] font-bold">Panoramica</span>
+                <span class="font-bold">Panoramica</span>
             </button>
 
-            <button onclick="switchTab('movimenti')" id="nav-movimenti" class="nav-btn flex flex-col items-center gap-1 text-slate-400 hover:text-slate-600 transition">
+            <button onclick="switchTab('movimenti')" id="nav-movimenti" class="nav-btn text-slate-400 hover:text-slate-600 transition">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
-                <span class="text-[11px] font-semibold">Movimenti</span>
+                <span class="font-semibold">Movimenti</span>
             </button>
 
-            <!-- Pulsante Centrale Aggiunta Rapida -->
-            <button onclick="openNewExpenseModal()" aria-label="Aggiungi spesa" class="-mt-7 w-14 h-14 rounded-full bg-brand-600 hover:bg-brand-700 active:scale-95 text-white shadow-lg shadow-brand-500/40 flex items-center justify-center text-2xl font-bold transition border-4 border-slate-50">
+            <button onclick="openNewExpenseModal()" aria-label="Aggiungi spesa" class="fab-btn bg-brand-600 hover:bg-brand-700 active:scale-95 text-white shadow-lg shadow-brand-500/40 text-2xl font-bold transition border-4 border-slate-50">
                 +
             </button>
 
-            <button onclick="switchTab('consigli')" id="nav-consigli" class="nav-btn flex flex-col items-center gap-1 text-slate-400 hover:text-slate-600 transition relative">
+            <button onclick="switchTab('consigli')" id="nav-consigli" class="nav-btn text-slate-400 hover:text-slate-600 transition relative">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
-                <span class="text-[11px] font-semibold">Consigli AI</span>
-                <span class="w-2 h-2 rounded-full bg-amber-400 absolute top-0 right-2"></span>
+                <span class="font-semibold">Consigli AI</span>
             </button>
 
-            <button onclick="openSimulatorDrawer()" class="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-600 transition">
+            <button onclick="triggerRandomTransaction()" class="text-slate-400 hover:text-slate-600 transition">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
-                <span class="text-[11px] font-semibold">Carta</span>
+                <span class="font-semibold">Test Carta</span>
             </button>
         </nav>
 
-        <!-- ================= MODALE 1: COMPILAZIONE SPESA (Da Notifica o '+' ) ================= -->
+        <!-- ================= MODALE 1: COMPILAZIONE SPESA ================= -->
         <div id="expenseModal" class="hidden absolute inset-0 z-40 bg-slate-900/60 backdrop-blur-xs flex flex-col justify-end">
             <div class="bg-white rounded-t-[32px] p-6 sheet-enter shadow-2xl max-h-[90%] overflow-y-auto">
                 <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-4"></div>
@@ -349,8 +328,7 @@
                     <div>
                         <label class="block text-xs font-semibold text-slate-500 mb-1">Dettaglio articoli comprati</label>
                         <input type="text" id="inputItems" required placeholder="Es. Spesa settimanale, frutta, caffè..." class="w-full px-3.5 py-2.5 rounded-2xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:outline-none focus:border-brand-500">
-                        <!-- Suggerimenti rapidi cliccabili -->
-                        <div class="flex flex-wrap gap-1.5 mt-2" id="quickTagSuggestions">
+                        <div class="flex flex-wrap gap-1.5 mt-2">
                             <button type="button" onclick="appendQuickItem('Spesa alimentare')" class="text-[11px] bg-slate-100 hover:bg-brand-50 text-slate-600 hover:text-brand-700 px-2.5 py-1 rounded-xl transition">+ Spesa alimentare</button>
                             <button type="button" onclick="appendQuickItem('Pranzo veloce')" class="text-[11px] bg-slate-100 hover:bg-brand-50 text-slate-600 hover:text-brand-700 px-2.5 py-1 rounded-xl transition">+ Pranzo veloce</button>
                             <button type="button" onclick="appendQuickItem('Caffè e cornetto')" class="text-[11px] bg-slate-100 hover:bg-brand-50 text-slate-600 hover:text-brand-700 px-2.5 py-1 rounded-xl transition">+ Caffè e cornetto</button>
@@ -360,7 +338,7 @@
 
                     <div>
                         <label class="block text-xs font-semibold text-slate-500 mb-1.5">Categoria</label>
-                        <div class="grid grid-cols-2 gap-2" id="categorySelector">
+                        <div class="grid grid-cols-2 gap-2">
                             <label class="cursor-pointer">
                                 <input type="radio" name="category" value="Spesa & Casa" class="peer hidden" checked>
                                 <div class="p-2.5 rounded-2xl border border-slate-200 peer-checked:border-brand-600 peer-checked:bg-brand-50 text-xs font-semibold flex items-center gap-2 transition">
@@ -401,7 +379,7 @@
             </div>
         </div>
 
-        <!-- ================= MODALE 3: MODIFICA BUDGET MENSILE ================= -->
+        <!-- ================= MODALE 2: MODIFICA BUDGET MENSILE ================= -->
         <div id="budgetModal" class="hidden absolute inset-0 z-40 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-5">
             <div class="bg-white rounded-3xl p-6 w-full max-w-xs shadow-2xl">
                 <h3 class="text-base font-extrabold text-slate-900 mb-1">Budget Mensile</h3>
@@ -415,7 +393,7 @@
         </div>
 
         <!-- TOAST DI CONFERMA -->
-        <div id="toast" class="hidden absolute bottom-20 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white text-xs font-semibold px-4 py-2.5 rounded-full shadow-lg whitespace-nowrap">
+        <div id="toast" class="hidden absolute bottom-24 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white text-xs font-semibold px-4 py-2.5 rounded-full shadow-lg whitespace-nowrap">
             ✅ Spesa salvata!
         </div>
 
@@ -423,8 +401,9 @@
 
     <script>
         // ==========================================
-        // STATO APPLICAZIONE & DATI INIZIALI
+        // CONFIGURAZIONE & STATO APPLICAZIONE
         // ==========================================
+        const GEMINI_API_KEY = "AQ.Ab8RN6I1-ld4-MDXzwaJeHVdVDxbHe-S--lNJXtWeL6Jak6cjQ"; // Sostituisci con la tua nuova chiave AI Studio
         const STORAGE_KEY_TX = 'spendismart_transactions_v1';
         const STORAGE_KEY_BUDGET = 'spendismart_budget_v1';
 
@@ -436,25 +415,12 @@
             'Bollette & Abbonamenti': { icon: '📱', color: '#10b981', bg: 'bg-emerald-100', text: 'text-emerald-700' }
         };
 
-        const DEFAULT_TRANSACTIONS = [
-            { id: 1, merchant: 'Esselunga', amount: 64.20, items: 'Spesa settimanale, carne, verdura e detersivi', category: 'Spesa & Casa', date: 'Oggi, 09:40', card: '•••• 4829' },
-            { id: 2, merchant: 'Just Eat - Pizzeria', amount: 26.50, items: '2 pizze margherita, supplì e bibite', category: 'Ristoranti & Delivery', date: 'Ieri, 20:15', card: '•••• 4829' },
-            { id: 3, merchant: 'Q8 Easy', amount: 45.00, items: 'Rifornimento benzina', category: 'Trasporti', date: '24 Nov', card: '•••• 4829' },
-            { id: 4, merchant: 'Bar Centrale', amount: 4.80, items: 'Cappuccino, spremuta e cornetto', category: 'Ristoranti & Delivery', date: '23 Nov', card: '•••• 4829' },
-            { id: 5, merchant: 'Zara', amount: 59.95, items: 'Maglione invernale', category: 'Svago & Shopping', date: '21 Nov', card: '•••• 4829' },
-            { id: 6, merchant: 'Netflix & Spotify', amount: 23.98, items: 'Abbonamenti mensili streaming', category: 'Bollette & Abbonamenti', date: '20 Nov', card: '•••• 9104' },
-            { id: 7, merchant: 'Glovo Sushi', amount: 34.00, items: 'Box sushi misto cena', category: 'Ristoranti & Delivery', date: '18 Nov', card: '•••• 4829' },
-            { id: 8, merchant: 'Carrefour Express', amount: 28.40, items: 'Frutta, latte, pane e pasta', category: 'Spesa & Casa', date: '16 Nov', card: '•••• 4829' },
-            { id: 9, merchant: 'Osteria del Borgo', amount: 42.00, items: 'Pranzo fuori con colleghi', category: 'Ristoranti & Delivery', date: '14 Nov', card: '•••• 4829' }
-        ];
-
         const RANDOM_EVENTS = [
             { merchant: 'Starbucks', amount: 6.50, category: 'Ristoranti & Delivery' },
             { merchant: 'Lidl', amount: 39.80, category: 'Spesa & Casa' },
             { merchant: 'Trenitalia', amount: 19.90, category: 'Trasporti' },
             { merchant: 'Unieuro', amount: 49.00, category: 'Svago & Shopping' },
-            { merchant: 'Poke House', amount: 15.50, category: 'Ristoranti & Delivery' },
-            { merchant: 'Farmacia Comunale', amount: 22.40, category: 'Spesa & Casa' }
+            { merchant: 'Poke House', amount: 15.50, category: 'Ristoranti & Delivery' }
         ];
 
         let transactions = [];
@@ -469,19 +435,30 @@
         // ==========================================
         window.addEventListener('DOMContentLoaded', () => {
             loadState();
-            updateClock();
-            setInterval(updateClock, 30000);
             renderAll();
+
+            // Listener nativo Android per notifiche bancarie reali
+            if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.BankPlugin) {
+                window.Capacitor.Plugins.BankPlugin.addListener('onBankTransaction', (data) => {
+                    pendingCardTx = {
+                        merchant: data.merchant || 'Pagamento Carta',
+                        amount: parseFloat(data.amount) || 0,
+                        category: 'Spesa & Casa'
+                    };
+                    openExpenseModalFromNotif();
+                });
+            }
         });
 
         function loadState() {
             try {
                 const savedTx = localStorage.getItem(STORAGE_KEY_TX);
                 const savedBudget = localStorage.getItem(STORAGE_KEY_BUDGET);
-                transactions = savedTx ? JSON.parse(savedTx) : [...DEFAULT_TRANSACTIONS];
+                // Parte SEMPRE vuoto [] alla prima installazione (niente transazioni false)
+                transactions = savedTx ? JSON.parse(savedTx) : [];
                 monthlyBudget = savedBudget ? parseFloat(savedBudget) : 800;
             } catch (e) {
-                transactions = [...DEFAULT_TRANSACTIONS];
+                transactions = [];
                 monthlyBudget = 800;
             }
         }
@@ -495,46 +472,25 @@
             }
         }
 
-        function resetDemoData() {
-            transactions = [...DEFAULT_TRANSACTIONS];
-            monthlyBudget = 800;
-            saveState();
-            renderAll();
-            showToast('🔄 Dati demo ripristinati');
-        }
-
-        function updateClock() {
-            const now = new Date();
-            const hh = String(now.getHours()).padStart(2, '0');
-            const mm = String(now.getMinutes()).padStart(2, '0');
-            const clockEl = document.getElementById('clockDisplay');
-            if (clockEl) clockEl.textContent = `${hh}:${mm}`;
-        }
-
         function formatEuro(val) {
             return '€ ' + val.toFixed(2).replace('.', ',');
         }
 
         // ==========================================
-        // SIMULAZIONE NOTIFICA PUSH CARTA
+        // NOTIFICA & MODALE SPESA
         // ==========================================
         function triggerCardSimulation(merchant, amount, suggestedCategory = 'Spesa & Casa') {
             pendingCardTx = { merchant, amount, category: suggestedCategory };
-            
             const notifEl = document.getElementById('pushNotification');
             document.getElementById('notifAmount').textContent = formatEuro(amount);
             document.getElementById('notifMerchant').textContent = merchant;
 
-            // Suono sintetico leggero tramite Web Audio API (senza file esterni)
             playNotificationTone();
-
             notifEl.classList.remove('hidden', 'notif-exit');
             notifEl.classList.add('notif-enter');
 
             if (notifTimeout) clearTimeout(notifTimeout);
-            notifTimeout = setTimeout(() => {
-                hideNotificationBanner();
-            }, 9000);
+            notifTimeout = setTimeout(() => hideNotificationBanner(), 9000);
         }
 
         function triggerRandomTransaction() {
@@ -547,9 +503,7 @@
             if (!notifEl.classList.contains('hidden')) {
                 notifEl.classList.remove('notif-enter');
                 notifEl.classList.add('notif-exit');
-                setTimeout(() => {
-                    notifEl.classList.add('hidden');
-                }, 300);
+                setTimeout(() => notifEl.classList.add('hidden'), 300);
             }
         }
 
@@ -570,7 +524,7 @@
                 document.getElementById('inputMerchant').value = pendingCardTx.merchant;
                 document.getElementById('inputAmount').value = pendingCardTx.amount.toFixed(2);
                 document.getElementById('inputItems').value = '';
-                selectCategoryRadio(pendingCardTx.category);
+                selectCategoryRadio(pendingCardTx.category || 'Spesa & Casa');
             }
             document.getElementById('expenseModal').classList.remove('hidden');
             setTimeout(() => document.getElementById('inputItems').focus(), 150);
@@ -593,19 +547,14 @@
         }
 
         function selectCategoryRadio(catName) {
-            const radios = document.querySelectorAll('input[name="category"]');
-            radios.forEach(r => {
+            document.querySelectorAll('input[name="category"]').forEach(r => {
                 r.checked = (r.value === catName);
             });
         }
 
         function appendQuickItem(text) {
             const input = document.getElementById('inputItems');
-            if (input.value.trim() === '') {
-                input.value = text;
-            } else {
-                input.value += ', ' + text.toLowerCase();
-            }
+            input.value = input.value.trim() === '' ? text : input.value + ', ' + text.toLowerCase();
         }
 
         function saveExpense(e) {
@@ -627,7 +576,7 @@
                 items: items || 'Acquisto generico',
                 category,
                 date: `Oggi, ${timeStr}`,
-                card: pendingCardTx ? '•••• 4829' : 'Manuale'
+                card: pendingCardTx ? 'Carta' : 'Manuale'
             };
 
             transactions.unshift(newTx);
@@ -652,12 +601,13 @@
             renderChart();
             renderTransactionLists();
             renderAIInsights();
+            aggiornaConsigliGemini();
         }
 
         function renderBudgetOverview() {
             const totalSpent = transactions.reduce((sum, tx) => sum + tx.amount, 0);
             const remaining = monthlyBudget - totalSpent;
-            const pct = Math.min(100, Math.round((totalSpent / monthlyBudget) * 100));
+            const pct = monthlyBudget > 0 ? Math.min(100, Math.round((totalSpent / monthlyBudget) * 100)) : 0;
 
             document.getElementById('totalSpentDisplay').textContent = formatEuro(totalSpent);
             document.getElementById('budgetDisplay').textContent = formatEuro(monthlyBudget);
@@ -684,11 +634,7 @@
             
             let grandTotal = 0;
             transactions.forEach(tx => {
-                if (totalsByCat[tx.category] !== undefined) {
-                    totalsByCat[tx.category] += tx.amount;
-                } else {
-                    totalsByCat[tx.category] = tx.amount;
-                }
+                totalsByCat[tx.category] = (totalsByCat[tx.category] || 0) + tx.amount;
                 grandTotal += tx.amount;
             });
 
@@ -696,19 +642,11 @@
             const data = labels.map(l => totalsByCat[l]);
             const colors = labels.map(l => CATEGORY_META[l]?.color || '#64748b');
 
-            // Calcola categoria principale
-            let topCat = labels[0];
             let maxVal = 0;
-            labels.forEach((l, idx) => {
-                if (data[idx] > maxVal) {
-                    maxVal = data[idx];
-                    topCat = l;
-                }
-            });
+            labels.forEach((l, idx) => { if (data[idx] > maxVal) maxVal = data[idx]; });
             const topPct = grandTotal > 0 ? Math.round((maxVal / grandTotal) * 100) : 0;
             document.getElementById('chartCenterPercent').textContent = `${topPct}%`;
 
-            // Aggiorna Legenda
             const legendEl = document.getElementById('chartLegend');
             legendEl.innerHTML = labels
                 .map((label, idx) => ({ label, val: data[idx], color: colors[idx] }))
@@ -726,7 +664,6 @@
                     `;
                 }).join('');
 
-            // Chart.js Donut
             const ctx = document.getElementById('categoryChart').getContext('2d');
             if (categoryChartInstance) {
                 categoryChartInstance.data.labels = labels;
@@ -738,27 +675,13 @@
                     type: 'doughnut',
                     data: {
                         labels: labels,
-                        datasets: [{
-                            data: data,
-                            backgroundColor: colors,
-                            borderWidth: 0,
-                            hoverOffset: 4
-                        }]
+                        datasets: [{ data: data, backgroundColor: colors, borderWidth: 0, hoverOffset: 4 }]
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
                         cutout: '72%',
-                        plugins: {
-                            legend: { display: false },
-                            tooltip: {
-                                callbacks: {
-                                    label: function(context) {
-                                        return ` € ${context.parsed.toFixed(2).replace('.', ',')}`;
-                                    }
-                                }
-                            }
-                        }
+                        plugins: { legend: { display: false } }
                     }
                 });
             }
@@ -786,9 +709,7 @@
                             <div class="text-[10px] font-medium ${meta.text}">${tx.category.split(' ')[0]}</div>
                         </div>
                         ${showDelete ? `
-                            <button onclick="deleteTransaction(${tx.id})" title="Elimina" class="w-7 h-7 rounded-xl bg-white hover:bg-rose-50 text-slate-400 hover:text-rose-600 border border-slate-200 flex items-center justify-center text-xs transition ml-1">
-                                ✕
-                            </button>
+                            <button onclick="deleteTransaction(${tx.id})" title="Elimina" class="w-7 h-7 rounded-xl bg-white hover:bg-rose-50 text-slate-400 hover:text-rose-600 border border-slate-200 flex items-center justify-center text-xs transition ml-1">✕</button>
                         ` : ''}
                     </div>
                 </div>
@@ -796,11 +717,13 @@
         }
 
         function renderTransactionLists() {
-            // Ultimi 4 in Panoramica
             const recentEl = document.getElementById('recentTransactionsList');
-            recentEl.innerHTML = transactions.slice(0, 4).map(tx => createTransactionCardHTML(tx, false)).join('');
+            if (transactions.length === 0) {
+                recentEl.innerHTML = `<div class="text-center py-6 text-xs text-slate-400">Nessun acquisto ancora registrato. Tocca + per iniziare.</div>`;
+            } else {
+                recentEl.innerHTML = transactions.slice(0, 4).map(tx => createTransactionCardHTML(tx, false)).join('');
+            }
 
-            // Lista completa filtrata in Movimenti
             const filtered = currentFilter === 'Tutte' 
                 ? transactions 
                 : transactions.filter(t => t.category === currentFilter);
@@ -817,17 +740,15 @@
         function setCategoryFilter(cat) {
             currentFilter = cat;
             document.querySelectorAll('.filter-chip').forEach(btn => {
-                if (btn.dataset.cat === cat) {
-                    btn.className = 'filter-chip active px-3.5 py-1.5 rounded-2xl text-xs font-semibold bg-slate-900 text-white shrink-0 transition';
-                } else {
-                    btn.className = 'filter-chip px-3.5 py-1.5 rounded-2xl text-xs font-semibold bg-white text-slate-600 border border-slate-200 shrink-0 transition';
-                }
+                btn.className = btn.dataset.cat === cat
+                    ? 'filter-chip active px-3.5 py-1.5 rounded-2xl text-xs font-semibold bg-slate-900 text-white shrink-0 transition'
+                    : 'filter-chip px-3.5 py-1.5 rounded-2xl text-xs font-semibold bg-white text-slate-600 border border-slate-200 shrink-0 transition';
             });
             renderTransactionLists();
         }
 
         // ==========================================
-        // MOTORE DINAMICO CONSIGLI DI RISPARMIO AI
+        // MOTORE LOCALE + CHIAMATA GEMINI AI
         // ==========================================
         function renderAIInsights() {
             const totalSpent = transactions.reduce((s, t) => s + t.amount, 0);
@@ -838,125 +759,126 @@
             const insights = [];
             let totalMonthlySavePotential = 0;
 
-            // 1. Analisi Ristoranti & Delivery
-            const foodOut = byCat['Ristoranti & Delivery'] || 0;
-            const foodRatio = totalSpent > 0 ? (foodOut / totalSpent) * 100 : 0;
-            if (foodOut > 40) {
-                const save25 = foodOut * 0.25;
-                totalMonthlySavePotential += save25;
-                insights.push({
-                    badge: 'Impatto Alto 🔥',
-                    badgeClass: 'bg-amber-100 text-amber-800',
-                    title: 'Riduci il Delivery e i pasti fuori del 25%',
-                    desc: `Hai già speso ${formatEuro(foodOut)} (${Math.round(foodRatio)}% del totale) in ristoranti, bar e delivery. Preparando 2 pranzi in più a casa a settimana risparmieresti subito.`,
-                    monthlySave: save25
-                });
+            if (transactions.length > 0) {
+                const foodOut = byCat['Ristoranti & Delivery'] || 0;
+                if (foodOut > 15) {
+                    const save25 = foodOut * 0.25;
+                    totalMonthlySavePotential += save25;
+                    insights.push({
+                        badge: 'Impatto Alto 🔥',
+                        badgeClass: 'bg-amber-100 text-amber-800',
+                        title: 'Riduci Delivery e pasti fuori',
+                        desc: `Hai speso ${formatEuro(foodOut)} in ristoranti/bar. Preparando qualche pasto in più a casa puoi tagliare subito questa voce.`,
+                        monthlySave: save25
+                    });
+                }
+
+                const shopping = byCat['Svago & Shopping'] || 0;
+                if (shopping > 20) {
+                    const saveShop = shopping * 0.20;
+                    totalMonthlySavePotential += saveShop;
+                    insights.push({
+                        badge: 'Regola delle 48 Ore 🛍️',
+                        badgeClass: 'bg-pink-100 text-pink-800',
+                        title: 'Ottimizza lo shopping',
+                        desc: `Hai speso ${formatEuro(shopping)} in Svago & Shopping. Aspettare 48 ore prima degli acquisti non essenziali riduce le spese d'impulso.`,
+                        monthlySave: saveShop
+                    });
+                }
+
+                if (insights.length === 0) {
+                    const baseSave = totalSpent * 0.15;
+                    totalMonthlySavePotential = baseSave;
+                    insights.push({
+                        badge: 'Analisi Attiva 📊',
+                        badgeClass: 'bg-indigo-100 text-indigo-800',
+                        title: 'Ottimo inizio di monitoraggio',
+                        desc: `Hai registrato ${transactions.length} spese per un totale di ${formatEuro(totalSpent)}. Continua così per affinare le stime.`,
+                        monthlySave: baseSave
+                    });
+                }
             }
 
-            // 2. Analisi Micro-spese (< 15€)
-            const microTx = transactions.filter(t => t.amount <= 15);
-            const microSum = microTx.reduce((s, t) => s + t.amount, 0);
-            if (microTx.length >= 2 || microSum > 15) {
-                const saveMicro = microSum * 0.30;
-                totalMonthlySavePotential += saveMicro;
-                insights.push({
-                    badge: 'Abitudini Quotidiane ☕',
-                    badgeClass: 'bg-indigo-100 text-indigo-800',
-                    title: 'Attenzione alle piccole spese frequenti',
-                    desc: `Hai effettuato ${microTx.length} transazioni sotto i € 15 (totale ${formatEuro(microSum)}). Caffè, snack e piccoli acquisti d'impulso pesano più di quanto sembri.`,
-                    monthlySave: saveMicro
-                });
-            }
-
-            // 3. Analisi Shopping & Svago
-            const shopping = byCat['Svago & Shopping'] || 0;
-            if (shopping > 45) {
-                const saveShop = shopping * 0.20;
-                totalMonthlySavePotential += saveShop;
-                insights.push({
-                    badge: 'Regola delle 48 Ore 🛍️',
-                    badgeClass: 'bg-pink-100 text-pink-800',
-                    title: 'Ottimizza lo shopping non essenziale',
-                    desc: `Hai speso ${formatEuro(shopping)} in Svago & Shopping. Aspettare 48 ore prima di confermare un carrello online riduce gli acquisti impulsivi del 20%.`,
-                    monthlySave: saveShop
-                });
-            }
-
-            // 4. Analisi Spesa & Casa (ottimizzazione scontrino)
-            const grocery = byCat['Spesa & Casa'] || 0;
-            if (grocery > 50) {
-                const saveGrocery = grocery * 0.15;
-                totalMonthlySavePotential += saveGrocery;
-                insights.push({
-                    badge: 'Spesa Intelligente 🛒',
-                    badgeClass: 'bg-emerald-100 text-emerald-800',
-                    title: 'Risparmia il 15% al supermercato',
-                    desc: `Con una lista della spesa pianificata ed evitando gli acquisti a stomaco vuoto puoi tagliare circa ${formatEuro(saveGrocery)} al mese sui tuoi ${formatEuro(grocery)} di spesa alimentare.`,
-                    monthlySave: saveGrocery
-                });
-            }
-
-            // Fallback se ci sono pochissimi dati
-            if (insights.length === 0) {
-                insights.push({
-                    badge: 'Ottimo inizio 🌟',
-                    badgeClass: 'bg-emerald-100 text-emerald-800',
-                    title: 'Continua a registrare le tue spese',
-                    desc: 'Simula nuove transazioni con la carta o aggiungi i tuoi acquisti per sbloccare consigli personalizzati ancora più precisi.',
-                    monthlySave: 45
-                });
-                totalMonthlySavePotential = 45;
-            }
-
-            // Aggiorna Banner Rapido in Panoramica
-            document.getElementById('quickAiBannerText').textContent = 
-                `${insights[0].title}: puoi risparmiare fino a ${formatEuro(totalMonthlySavePotential)}/mese (${formatEuro(totalMonthlySavePotential * 12)}/anno).`;
-
-            // Aggiorna Header Tab Consigli
             document.getElementById('potentialMonthlySavings').textContent = `+ ${formatEuro(totalMonthlySavePotential)}`;
             document.getElementById('potentialAnnualSavings').textContent = `+ ${formatEuro(totalMonthlySavePotential * 12)} / anno`;
 
-            // Renderizza Card Consigli
             const container = document.getElementById('aiAdviceCardsContainer');
-            container.innerHTML = insights.map(item => `
-                <div class="bg-white rounded-3xl p-5 shadow-soft border border-slate-100">
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="text-[11px] font-bold px-2.5 py-1 rounded-xl ${item.badgeClass}">${item.badge}</span>
-                        <span class="text-xs font-extrabold text-emerald-600">+${formatEuro(item.monthlySave)}/mese</span>
+            if (insights.length === 0) {
+                container.innerHTML = `<div class="text-center py-8 text-xs text-slate-400">Nessuna spesa ancora registrata. Inserisci un acquisto per sbloccare i consigli.</div>`;
+            } else {
+                container.innerHTML = insights.map(item => `
+                    <div class="bg-white rounded-3xl p-5 shadow-soft border border-slate-100">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-[11px] font-bold px-2.5 py-1 rounded-xl ${item.badgeClass}">${item.badge}</span>
+                            <span class="text-xs font-extrabold text-emerald-600">+${formatEuro(item.monthlySave)}/mese</span>
+                        </div>
+                        <h3 class="font-bold text-slate-900 text-sm mb-1.5">${item.title}</h3>
+                        <p class="text-xs text-slate-600 leading-relaxed">${item.desc}</p>
                     </div>
-                    <h3 class="font-bold text-slate-900 text-sm mb-1.5">${item.title}</h3>
-                    <p class="text-xs text-slate-600 leading-relaxed">${item.desc}</p>
-                    <div class="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
-                        <span>Proiezione annuale</span>
-                        <span class="font-bold text-slate-700">+ ${formatEuro(item.monthlySave * 12)} risparmiati</span>
-                    </div>
-                </div>
-            `).join('');
+                `).join('');
+            }
+        }
+
+        async function aggiornaConsigliGemini(forceRefresh = false) {
+            const bannerBox = document.getElementById('ai-insight-box');
+            const fullBox = document.getElementById('ai-full-advice');
+
+            if (!transactions || transactions.length === 0) {
+                bannerBox.innerText = "Nessuna spesa registrata: i consigli dell'IA appariranno qui non appena inserisci il primo acquisto.";
+                if (fullBox) fullBox.innerText = "Inserisci la tua prima spesa per ricevere l'analisi personalizzata dall'intelligenza artificiale.";
+                return;
+            }
+
+            const totalSpent = transactions.reduce((acc, curr) => acc + curr.amount, 0);
+
+            // Se manca la API Key, usa il riepilogo locale intelligente
+            if (!GEMINI_API_KEY || GEMINI_API_KEY === "AQ.Ab8RN6I1-ld4-MDXzwaJeHVdVDxbHe-S--lNJXtWeL6Jak6cjQ") {
+                const msg = `Hai registrato ${transactions.length} spese (${formatEuro(totalSpent)} su ${formatEuro(monthlyBudget)}). Inserisci la tua API Key di Gemini per ricevere consigli AI personalizzati.`;
+                bannerBox.innerText = msg;
+                if (fullBox) fullBox.innerText = msg;
+                return;
+            }
+
+            bannerBox.innerText = "Analisi delle tue spese in corso con Gemini AI...";
+            if (fullBox) fullBox.innerText = "Sto analizzando i tuoi movimenti...";
+
+            const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+            const prompt = `Analizza queste spese personali in Italia: ${JSON.stringify(transactions)}. Il budget mensile è ${monthlyBudget}€ e finora sono stati spesi ${totalSpent.toFixed(2)}€. Scrivi 2 brevi consigli pratici e diretti di risparmio in italiano (massimo 3-4 righe totali), evidenziando dove tagliare subito.`;
+
+            try {
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                });
+
+                const data = await response.json();
+                if (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
+                    const aiText = data.candidates[0].content.parts[0].text.trim();
+                    bannerBox.innerText = aiText;
+                    if (fullBox) fullBox.innerText = aiText;
+                } else {
+                    throw new Error(data.error?.message || "Risposta AI non valida");
+                }
+            } catch (error) {
+                console.warn("Errore chiamata Gemini:", error);
+                const fallback = `Hai speso ${formatEuro(totalSpent)} su ${formatEuro(monthlyBudget)}. Controlla le spese più frequenti nella scheda Movimenti per ottimizzare il budget.`;
+                bannerBox.innerText = fallback;
+                if (fullBox) fullBox.innerText = fallback;
+            }
         }
 
         // ==========================================
-        // NAVIGAZIONE & MODALI SECONDARIE
+        // NAVIGAZIONE & MODALI
         // ==========================================
         function switchTab(tabName) {
             ['panoramica', 'movimenti', 'consigli'].forEach(t => {
                 document.getElementById(`tab-${t}`).classList.toggle('hidden', t !== tabName);
                 const btn = document.getElementById(`nav-${t}`);
-                if (t === tabName) {
-                    btn.classList.remove('text-slate-400');
-                    btn.classList.add('text-brand-600');
-                } else {
-                    btn.classList.remove('text-brand-600');
-                    btn.classList.add('text-slate-400');
-                }
+                btn.classList.toggle('text-brand-600', t === tabName);
+                btn.classList.toggle('text-slate-400', t !== tabName);
             });
             document.getElementById('scrollContainer').scrollTop = 0;
-        }
-
-        function openSimulatorDrawer() {
-            document.getElementById('simulatorDrawer').classList.remove('hidden');
-        }
-        function closeSimulatorDrawer() {
-            document.getElementById('simulatorDrawer').classList.add('hidden');
         }
 
         function openBudgetModal() {
@@ -971,7 +893,7 @@
             if (!isNaN(val) && val >= 50) {
                 monthlyBudget = val;
                 saveState();
-                renderBudgetOverview();
+                renderAll();
                 closeBudgetModal();
                 showToast('🎯 Budget aggiornato!');
             }
@@ -981,9 +903,7 @@
             const toast = document.getElementById('toast');
             toast.textContent = msg;
             toast.classList.remove('hidden');
-            setTimeout(() => {
-                toast.classList.add('hidden');
-            }, 2600);
+            setTimeout(() => toast.classList.add('hidden'), 2600);
         }
 
         function escapeHTML(str) {
@@ -992,7 +912,6 @@
             }[tag]));
         }
 
-        // Piccolo feedback sonoro nativo per la notifica push
         function playNotificationTone() {
             try {
                 const AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -1011,116 +930,6 @@
                 osc.stop(ctx.currentTime + 0.25);
             } catch (e) {}
         }
-    </script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            if (window.Capacitor && window.Capacitor.Plugins.BankPlugin) {
-            window.Capacitor.Plugins.BankPlugin.addListener('onBankTransaction', (data) => {
-                // Precompila i campi della modale di SpendiSmart e la apre
-                const merchantInput = document.getElementById('tx-merchant');
-                const amountInput = document.getElementById('tx-amount');
-                
-                if (merchantInput && amountInput) {
-                merchantInput.value = data.merchant;
-                amountInput.value = data.amount.toFixed(2);
-                
-                // Apri la modale di inserimento spesa (adatta al nome funzione nel tuo index.html)
-                if (typeof openAddModal === 'function') {
-                    openAddModal();
-                }
-                }
-            });
-            }
-        });
-    </script>
-    <script>
-        async function aggiornaConsigliRisparmio(speseList, budgetTotale) {
-        const boxElement = document.getElementById('ai-insight-box');
-        
-        // 1. Controllo di sicurezza: se non ci sono spese, mostra il messaggio simulato iniziale
-        if (!speseList || speseList.length === 0) {
-            boxElement.innerText = "Continua a registrare le tue spese: l'IA analizzerà i tuoi movimenti non appena inserisci il primo acquisto.";
-            return;
-        }
-
-        const apiKey = "AQ.Ab8RN6KMo9ay4zCxdOrIo5L-ZHa0Sr0y_jyUfyrRSoP1lWEKCg";
-        
-        // 2. Se per caso non hai ancora inserito la chiave, usa la simulazione intelligente basata sui dati locali
-        if (!apiKey || apiKey === "AQ.Ab8RN6KMo9ay4zCxdOrIo5L-ZHa0Sr0y_jyUfyrRSoP1lWEKCg") {
-            calcolaConsiglioSimulato(speseList, budgetTotale, boxElement);
-            return;
-        }
-
-        // 3. Altrimenti, chiama l'API reale di Gemini con i dati veri
-        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
-        
-        const totaleSpeso = speseList.reduce((acc, curr) => acc + curr.amount, 0);
-        const prompt = `Analizza queste spese personali in Italia: ${JSON.stringify(speseList)}. Il budget mensile è ${budgetTotale}€ e finora sono stati spesi ${totaleSpeso}€. Scrivi un unico consiglio di risparmio molto breve, diretto, in italiano (massimo 2 righe), evidenziando dove si spende di più.`;
-
-        try {
-            boxElement.innerText = "Analisi in corso da parte dell'IA...";
-            
-            const response = await fetch(endpoint, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-            });
-            
-            const data = await response.json();
-            const consiglioVero = data.candidates[0].content.parts[0].text;
-            
-            // Mostra il consiglio generato da Gemini
-            boxElement.innerText = consiglioVero;
-
-        } catch (error) {
-            console.warn("Connessione assente o errore API, fallback sulla simulazione locale.", error);
-            // 4. Fallback in caso di assenza di rete: se la chiamata fallisce, usa la simulazione
-            calcolaConsiglioSimulato(speseList, budgetTotale, boxElement);
-        }
-        }
-
-        // Funzione di simulazione/fallback offline basata sulle tue spese reali
-        function calcolaConsiglioSimulato(speseList, budgetTotale, element) {
-        const spesaTotale = speseList.reduce((acc, curr) => acc + curr.amount, 0);
-        
-        // Raggruppa per categoria per trovare dove si spende di più
-        const categorie = {};
-        speseList.forEach(s => {
-            categorie[s.category] = (categorie[s.category] || 0) + s.amount;
-        });
-        
-        let catPiuCostosa = "Varie";
-        let maxSpesa = 0;
-        for (let cat in categorie) {
-            if (categorie[cat] > maxSpesa) {
-            maxSpesa = categorie[cat];
-            catPiuCostosa = cat;
-            }
-        }
-
-        // Restituisce un consiglio simulato ma dinamico in base alle spese registrate
-        if (spesaTotale > (budgetTotale * 0.7)) {
-            element.innerText = `Attenzione: hai quasi esaurito il budget (${spesaTotale.toFixed(2)}€). Cerca di limitare le spese nella categoria ${catPiuCostosa}.`;
-        } else {
-            element.innerText = `Ottimo ritmo! La voce più alta al momento è ${catPiuCostosa} (${maxSpesa.toFixed(2)}€). Puoi risparmiare ancora circa 45,00€/mese tagliando i piccoli sfizi.`;
-        }
-    }
-    </script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const speseSalvate = JSON.parse(localStorage.getItem('spendismart_spese') || '[]');
-            const boxConsigli = document.getElementById('ai-insight-box');
-
-            if (boxConsigli) {
-            if (speseSalvate.length === 0) {
-                // Se non ci sono spese, mostra un messaggio di benvenuto pulito
-                boxConsigli.innerText = "Nessuna spesa registrata: i consigli dell'IA appariranno qui man mano che usi la carta.";
-            } else {
-                // Se hai inserito la tua API key di Gemini, qui puoi far partire la chiamata AI
-                // fetchAIConsigli(); 
-            }
-            }
-        });
     </script>
 </body>
 </html>

@@ -13,13 +13,14 @@ jobs:
       - name: Scarica il codice
         uses: actions/checkout@v4
 
-      - name: Imposta Node.js
+      - name: Imposta Node.js 22
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
 
       - name: Installa dipendenze e sincronizza Capacitor
         run: |
+          rm -rf node_modules
           npm install
           npx cap sync android
 

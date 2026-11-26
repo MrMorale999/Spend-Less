@@ -526,6 +526,8 @@
                                 title: `Pagamento di ${formatEuro(amount)} da ${merchant}`,
                                 body: 'Tocca qui per scrivere cosa hai comprato ✍️',
                                 channelId: 'spendismart_tx',
+                                smallIcon: 'ic_stat_icon',
+                                iconColor: '#4f46e5',
                                 schedule: { at: new Date(Date.now() + 300) },
                                 extra: {
                                     merchant: merchant,

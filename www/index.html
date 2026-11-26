@@ -190,13 +190,13 @@
                         <div class="w-10 h-10 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center text-xl shrink-0">
                             ✨
                         </div>
-                        <div class="flex-1 min-w-0">
-                            <div class="flex items-center justify-between">
-                                <span class="text-[11px] font-bold uppercase tracking-wider text-indigo-200">Insight Risparmio AI</span>
-                                <span class="text-xs text-white/80">Vedi tutti ➔</span>
+                        <div class="bg-gradient-to-r from-purple-600 to-indigo-600 p-4 rounded-2xl text-white shadow-md">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="text-xs font-semibold uppercase tracking-wider opacity-80">✨ Coach Risparmio AI</span>
+                                <span class="text-xs underline cursor-pointer">Vedi tutti &rarr;</span>
                             </div>
                             <p id="ai-insight-box" class="text-sm opacity-90">
-                                Continua a registrare le tue spese per sbloccare i consigli personalizzati...
+                                Inizia a registrare le prime spese per sbloccare i consigli personalizzati...
                             </p>
                         </div>
                     </div>
@@ -1105,6 +1105,22 @@
             element.innerText = `Ottimo ritmo! La voce più alta al momento è ${catPiuCostosa} (${maxSpesa.toFixed(2)}€). Puoi risparmiare ancora circa 45,00€/mese tagliando i piccoli sfizi.`;
         }
     }
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const speseSalvate = JSON.parse(localStorage.getItem('spendismart_spese') || '[]');
+            const boxConsigli = document.getElementById('ai-insight-box');
+
+            if (boxConsigli) {
+            if (speseSalvate.length === 0) {
+                // Se non ci sono spese, mostra un messaggio di benvenuto pulito
+                boxConsigli.innerText = "Nessuna spesa registrata: i consigli dell'IA appariranno qui man mano che usi la carta.";
+            } else {
+                // Se hai inserito la tua API key di Gemini, qui puoi far partire la chiamata AI
+                // fetchAIConsigli(); 
+            }
+            }
+        });
     </script>
 </body>
 </html>

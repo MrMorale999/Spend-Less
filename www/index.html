@@ -99,7 +99,7 @@
 
     <main class="relative w-full sm:w-[400px] h-[100dvh] sm:h-[820px] bg-slate-50 sm:rounded-[44px] sm:shadow-phone overflow-hidden flex flex-col border-slate-800">
         
-        <!-- NOTIFICA PUSH INTERATTIVA IN ARRIVO -->
+        <!-- NOTIFICA PUSH INTERATTIVA IN ARRIVO (Fallback Web/iOS) -->
         <div id="pushNotification" class="hidden absolute top-3 left-3 right-3 z-50 cursor-pointer" onclick="openExpenseModalFromNotif()">
             <div class="bg-slate-900/95 backdrop-blur-md text-white p-3.5 rounded-3xl shadow-notif border border-white/15">
                 <div class="flex items-center justify-between mb-1.5">
@@ -438,10 +438,14 @@
         let categoryChartInstance = null;
 
         // ==========================================
-        // STORAGE NATIVO ANDROID (CAPACITOR) + WEB
+        // STORAGE & NOTIFICHE NATIVE ANDROID
         // ==========================================
         function getPreferencesPlugin() {
             return window.Capacitor && window.Capacitor.Plugins ? window.Capacitor.Plugins.Preferences : null;
+        }
+
+        function getLocalNotificationsPlugin() {
+            return window.Capacitor && window.Capacitor.Plugins ? window.Capacitor.Plugins.LocalNotifications : null;
         }
 
         async function storageSet(key, value) {
@@ -471,22 +475,99 @@
             }
         }
 
+        async function setupNativeNotifications() {
+            const LocalNotif = getLocalNotificationsPlugin();
+            if (!LocalNotif) return;
+
+            try {
+                let perm = await LocalNotif.checkPermissions();
+                if (perm.display !== 'granted') {
+                    await LocalNotif.requestPermissions();
+                }
+
+                if (LocalNotif.createChannel) {
+                    await LocalNotif.createChannel({
+                        id: 'spendismart_tx',
+                        name: 'Pagamenti Rilevati',
+                        description: 'Notifiche per registrare subito le spese della carta',
+                        importance: 5,
+                        visibility: 1,
+                        vibration: true
+                    });
+                }
+
+                await LocalNotif.addListener('localNotificationActionPerformed', (notificationAction) => {
+                    const extra = notificationAction.notification?.extra;
+                    if (extra && extra.merchant) {
+                        pendingCardTx = {
+                            merchant: extra.merchant,
+                            amount: parseFloat(extra.amount) || 0,
+                            category: extra.category || 'Spesa & Casa'
+                        };
+                        openExpenseModalFromNotif();
+                    }
+                });
+            } catch (e) {
+                console.warn('Errore inizializzazione notifiche:', e);
+            }
+        }
+
+        async function sendPhoneSystemNotification(merchant, amount, suggestedCategory = 'Spesa & Casa') {
+            const LocalNotif = getLocalNotificationsPlugin();
+
+            if (LocalNotif) {
+                try {
+                    await LocalNotif.schedule({
+                        notifications: [
+                            {
+                                id: Math.floor(Date.now() % 2147483647),
+                                title: `Pagamento di ${formatEuro(amount)} da ${merchant}`,
+                                body: 'Tocca qui per scrivere cosa hai comprato ✍️',
+                                channelId: 'spendismart_tx',
+                                schedule: { at: new Date(Date.now() + 300) },
+                                extra: {
+                                    merchant: merchant,
+                                    amount: amount,
+                                    category: suggestedCategory
+                                }
+                            }
+                        ]
+                    });
+                    showToast('📲 Notifica inviata sul telefono!');
+                    return;
+                } catch (e) {
+                    console.warn('Fallback notifica in-app:', e);
+                }
+            }
+
+            // Fallback per browser / iPhone web app
+            pendingCardTx = { merchant, amount, category: suggestedCategory };
+            const notifEl = document.getElementById('pushNotification');
+            document.getElementById('notifAmount').textContent = formatEuro(amount);
+            document.getElementById('notifMerchant').textContent = merchant;
+
+            playNotificationTone();
+            notifEl.classList.remove('hidden', 'notif-exit');
+            notifEl.classList.add('notif-enter');
+
+            if (notifTimeout) clearTimeout(notifTimeout);
+            notifTimeout = setTimeout(() => hideNotificationBanner(), 9000);
+        }
+
         // ==========================================
         // INIZIALIZZAZIONE
         // ==========================================
         window.addEventListener('DOMContentLoaded', async () => {
             await loadState();
+            await setupNativeNotifications();
             renderAll();
 
             // Listener nativo Android per notifiche bancarie reali
             if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.BankPlugin) {
-                window.Capacitor.Plugins.BankPlugin.addListener('onBankTransaction', (data) => {
-                    pendingCardTx = {
-                        merchant: data.merchant || 'Pagamento Carta',
-                        amount: parseFloat(data.amount) || 0,
-                        category: 'Spesa & Casa'
-                    };
-                    openExpenseModalFromNotif();
+                window.Capacitor.Plugins.BankPlugin.addListener('onBankTransaction', async (data) => {
+                    const merchant = data.merchant || 'Pagamento Carta';
+                    const amount = parseFloat(data.amount) || 0;
+                    await sendPhoneSystemNotification(merchant, amount, 'Spesa & Casa');
                 });
             }
         });
@@ -530,22 +611,12 @@
         // NOTIFICA & MODALE SPESA
         // ==========================================
         function triggerCardSimulation(merchant, amount, suggestedCategory = 'Spesa & Casa') {
-            pendingCardTx = { merchant, amount, category: suggestedCategory };
-            const notifEl = document.getElementById('pushNotification');
-            document.getElementById('notifAmount').textContent = formatEuro(amount);
-            document.getElementById('notifMerchant').textContent = merchant;
-
-            playNotificationTone();
-            notifEl.classList.remove('hidden', 'notif-exit');
-            notifEl.classList.add('notif-enter');
-
-            if (notifTimeout) clearTimeout(notifTimeout);
-            notifTimeout = setTimeout(() => hideNotificationBanner(), 9000);
+            sendPhoneSystemNotification(merchant, amount, suggestedCategory);
         }
 
         function triggerRandomTransaction() {
             const pick = RANDOM_EVENTS[Math.floor(Math.random() * RANDOM_EVENTS.length)];
-            triggerCardSimulation(pick.merchant, pick.amount, pick.category);
+            sendPhoneSystemNotification(pick.merchant, pick.amount, pick.category);
         }
 
         function hideNotificationBanner() {

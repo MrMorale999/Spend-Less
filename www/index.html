@@ -231,13 +231,22 @@
             <!-- ================= TAB 3: CONSIGLI DI RISPARMIO AI ================= -->
             <section id="tab-consigli" class="hidden space-y-4">
                 <div class="bg-slate-900 text-white rounded-3xl p-5 shadow-md">
-                    <div class="flex items-center gap-2">
-                        <button onclick="impostaApiKey()" class="text-xs font-semibold bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-xl transition">
-                            🔑 Key
-                        </button>
-                        <button onclick="aggiornaConsigliGemini(true)" class="text-xs font-semibold bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-xl transition">
-                            Aggiorna ✨
-                        </button>
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xl">🧠</span>
+                            <div>
+                                <h2 class="font-extrabold text-sm">Coach Risparmio AI</h2>
+                                <p class="text-[11px] text-slate-400">Analisi sulle tue spese</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="impostaApiKey()" class="text-xs font-semibold bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-xl transition">
+                                🔑 Key
+                            </button>
+                            <button onclick="aggiornaConsigliGemini(true)" class="text-xs font-semibold bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-xl transition">
+                                Aggiorna ✨
+                            </button>
+                        </div>
                     </div>
                     <div class="mt-4 pt-4 border-t border-white/10 flex items-center justify-between">
                         <div>
@@ -399,8 +408,11 @@
         // ==========================================
         // CONFIGURAZIONE & STATO APPLICAZIONE
         // ==========================================
-        const GEMINI_API_KEY = localStorage.getItem('spendismart_gemini_key') || ""; 
+        const STORAGE_KEY_TX = 'spendismart_transactions_v1';
         const STORAGE_KEY_BUDGET = 'spendismart_budget_v1';
+        const STORAGE_KEY_API = 'spendismart_gemini_key';
+
+        let GEMINI_API_KEY = "";
 
         const CATEGORY_META = {
             'Spesa & Casa': { icon: '🛒', color: '#4f46e5', bg: 'bg-indigo-100', text: 'text-indigo-700' },
@@ -426,10 +438,44 @@
         let categoryChartInstance = null;
 
         // ==========================================
+        // STORAGE NATIVO ANDROID (CAPACITOR) + WEB
+        // ==========================================
+        function getPreferencesPlugin() {
+            return window.Capacitor && window.Capacitor.Plugins ? window.Capacitor.Plugins.Preferences : null;
+        }
+
+        async function storageSet(key, value) {
+            try {
+                const prefs = getPreferencesPlugin();
+                if (prefs) {
+                    await prefs.set({ key, value });
+                }
+                localStorage.setItem(key, value);
+            } catch (e) {
+                console.warn('Errore salvataggio storage:', e);
+            }
+        }
+
+        async function storageGet(key) {
+            try {
+                const prefs = getPreferencesPlugin();
+                if (prefs) {
+                    const res = await prefs.get({ key });
+                    if (res && res.value !== null && res.value !== undefined) {
+                        return res.value;
+                    }
+                }
+                return localStorage.getItem(key);
+            } catch (e) {
+                return localStorage.getItem(key);
+            }
+        }
+
+        // ==========================================
         // INIZIALIZZAZIONE
         // ==========================================
-        window.addEventListener('DOMContentLoaded', () => {
-            loadState();
+        window.addEventListener('DOMContentLoaded', async () => {
+            await loadState();
             renderAll();
 
             // Listener nativo Android per notifiche bancarie reali
@@ -445,25 +491,34 @@
             }
         });
 
-        function loadState() {
+        async function loadState() {
             try {
-                const savedTx = localStorage.getItem(STORAGE_KEY_TX);
-                const savedBudget = localStorage.getItem(STORAGE_KEY_BUDGET);
-                // Parte SEMPRE vuoto [] alla prima installazione (niente transazioni false)
+                const savedTx = await storageGet(STORAGE_KEY_TX);
+                const savedBudget = await storageGet(STORAGE_KEY_BUDGET);
+                const savedKey = await storageGet(STORAGE_KEY_API);
+
                 transactions = savedTx ? JSON.parse(savedTx) : [];
                 monthlyBudget = savedBudget ? parseFloat(savedBudget) : 800;
+                GEMINI_API_KEY = savedKey || "";
             } catch (e) {
                 transactions = [];
                 monthlyBudget = 800;
+                GEMINI_API_KEY = "";
             }
         }
 
-        function saveState() {
-            try {
-                localStorage.setItem(STORAGE_KEY_TX, JSON.stringify(transactions));
-                localStorage.setItem(STORAGE_KEY_BUDGET, monthlyBudget.toString());
-            } catch (e) {
-                console.warn('Impossibile salvare in localStorage', e);
+        async function saveState() {
+            await storageSet(STORAGE_KEY_TX, JSON.stringify(transactions));
+            await storageSet(STORAGE_KEY_BUDGET, monthlyBudget.toString());
+        }
+
+        async function impostaApiKey() {
+            const nuovaKey = prompt("Incolla qui la tua API Key di Gemini:", GEMINI_API_KEY);
+            if (nuovaKey !== null) {
+                GEMINI_API_KEY = nuovaKey.trim();
+                await storageSet(STORAGE_KEY_API, GEMINI_API_KEY);
+                aggiornaConsigliGemini(true);
+                showToast('🔑 API Key salvata sul telefono!');
             }
         }
 
@@ -552,7 +607,7 @@
             input.value = input.value.trim() === '' ? text : input.value + ', ' + text.toLowerCase();
         }
 
-        function saveExpense(e) {
+        async function saveExpense(e) {
             e.preventDefault();
             const merchant = document.getElementById('inputMerchant').value.trim();
             const amount = parseFloat(document.getElementById('inputAmount').value);
@@ -575,15 +630,15 @@
             };
 
             transactions.unshift(newTx);
-            saveState();
+            await saveState();
             closeExpenseModal();
             renderAll();
             showToast('✅ Spesa salvata e analisi aggiornata!');
         }
 
-        function deleteTransaction(id) {
+        async function deleteTransaction(id) {
             transactions = transactions.filter(t => t.id !== id);
-            saveState();
+            await saveState();
             renderAll();
             showToast('🗑️ Movimento eliminato');
         }
@@ -826,9 +881,8 @@
 
             const totalSpent = transactions.reduce((acc, curr) => acc + curr.amount, 0);
 
-            // Se manca la API Key, usa il riepilogo locale intelligente
             if (!GEMINI_API_KEY || GEMINI_API_KEY.trim() === "") {
-                const msg = `Hai registrato ${transactions.length} spese (${formatEuro(totalSpent)} su ${formatEuro(monthlyBudget)}). Inserisci la tua API Key di Gemini per ricevere consigli AI personalizzati.`;
+                const msg = `Hai registrato ${transactions.length} spese (${formatEuro(totalSpent)} su ${formatEuro(monthlyBudget)}). Premi 🔑 Key nella scheda Consigli AI per inserire la tua chiave Gemini.`;
                 bannerBox.innerText = msg;
                 if (fullBox) fullBox.innerText = msg;
                 return;
@@ -883,11 +937,11 @@
         function closeBudgetModal() {
             document.getElementById('budgetModal').classList.add('hidden');
         }
-        function saveBudget() {
+        async function saveBudget() {
             const val = parseFloat(document.getElementById('budgetInput').value);
             if (!isNaN(val) && val >= 50) {
                 monthlyBudget = val;
-                saveState();
+                await saveState();
                 renderAll();
                 closeBudgetModal();
                 showToast('🎯 Budget aggiornato!');
@@ -924,17 +978,6 @@
                 osc.start();
                 osc.stop(ctx.currentTime + 0.25);
             } catch (e) {}
-        }
-    </script>
-    <script>
-        function impostaApiKey() {
-            const nuovaKey = prompt("Incolla qui la tua API Key di Gemini:", GEMINI_API_KEY);
-            if (nuovaKey !== null) {
-                GEMINI_API_KEY = nuovaKey.trim();
-                localStorage.setItem('spendismart_gemini_key', GEMINI_API_KEY);
-                aggiornaConsigliGemini(true);
-                showToast('🔑 API Key salvata sul telefono!');
-            }
         }
     </script>
 </body>

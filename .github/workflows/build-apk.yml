@@ -24,11 +24,11 @@ jobs:
           npm install
           npx cap sync android
 
-      - name: Imposta Java 17
+      - name: Imposta Java 21
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '17'
+          java-version: '21'
 
       - name: Dai permessi a Gradle
         run: chmod +x android/gradlew

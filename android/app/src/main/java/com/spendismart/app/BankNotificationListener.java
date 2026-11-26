@@ -21,14 +21,15 @@ public class BankNotificationListener extends NotificationListenerService {
 
     // Package di Google Wallet e principali banche italiane (aggiungi il tuo se manca)
     private static final List<String> ALLOWED_PACKAGES = Arrays.asList(
-            "com.google.android.apps.walletnfcrel", // Google Wallet
-            "com.revolut.revolut",                 // Revolut
-            "com.latuabanca.intesasanpaolo",       // Intesa Sanpaolo
-            "com.unicredit",                       // UniCredit
-            "it.bnl.apps.banking",                 // BNL
-            "it.fineco.mobile",                    // Fineco
-            "posteitaliane.posteapp.apppostepay",  // Postepay
-            "com.hype.app"                         // Hype
+            "com.google.android.apps.walletnfcrel",     // Google Wallet
+            "com.revolut.revolut",                      // Revolut
+            "com.latuabanca.intesasanpaolo",            // Intesa Sanpaolo
+            "com.unicredit",                            // UniCredit
+            "it.bnl.apps.banking",                      // BNL
+            "it.posteitaliane.bancoposta",              // BancoPosta
+            "it.fineco.mobile",                         // Fineco
+            "posteitaliane.posteapp.apppostepay",       // Postepay
+            "com.hype.app"                              // Hype
     );
 
     private static final String CHANNEL_ID = "spendismart_tx_channel";

@@ -2,7 +2,7 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>SpendiSmart - Il tuo Assistente Finanziario</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -12,7 +12,46 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    
+    <style>
+        .bottom-nav, nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            width: 100%;
+            display: grid !important;
+            grid-template-columns: repeat(5, 1fr);
+            align-items: center;
+            justify-items: center;
+            background: #ffffff;
+            border-top: 1px solid #e2e8f0;
+            padding: 8px 4px calc(10px + env(safe-area-inset-bottom)) 4px;
+            z-index: 50;
+            box-sizing: border-box;
+        }
+        .bottom-nav button, nav button {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+            padding: 4px 0;
+            font-size: 11px;
+            white-space: nowrap;
+        }
+        .fab-btn, .add-btn {
+            position: relative;
+            top: -14px;
+            width: 52px !important;
+            height: 52px !important;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+        }
+    </style>
     <script>
         tailwind.config = {
             theme: {
@@ -993,6 +1032,79 @@
             });
             }
         });
+    </script>
+    <script>
+        async function aggiornaConsigliRisparmio(speseList, budgetTotale) {
+        const boxElement = document.getElementById('ai-insight-box');
+        
+        // 1. Controllo di sicurezza: se non ci sono spese, mostra il messaggio simulato iniziale
+        if (!speseList || speseList.length === 0) {
+            boxElement.innerText = "Continua a registrare le tue spese: l'IA analizzerà i tuoi movimenti non appena inserisci il primo acquisto.";
+            return;
+        }
+
+        const apiKey = "AQ.Ab8RN6KMo9ay4zCxdOrIo5L-ZHa0Sr0y_jyUfyrRSoP1lWEKCg";
+        
+        // 2. Se per caso non hai ancora inserito la chiave, usa la simulazione intelligente basata sui dati locali
+        if (!apiKey || apiKey === "AQ.Ab8RN6KMo9ay4zCxdOrIo5L-ZHa0Sr0y_jyUfyrRSoP1lWEKCg") {
+            calcolaConsiglioSimulato(speseList, budgetTotale, boxElement);
+            return;
+        }
+
+        // 3. Altrimenti, chiama l'API reale di Gemini con i dati veri
+        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+        
+        const totaleSpeso = speseList.reduce((acc, curr) => acc + curr.amount, 0);
+        const prompt = `Analizza queste spese personali in Italia: ${JSON.stringify(speseList)}. Il budget mensile è ${budgetTotale}€ e finora sono stati spesi ${totaleSpeso}€. Scrivi un unico consiglio di risparmio molto breve, diretto, in italiano (massimo 2 righe), evidenziando dove si spende di più.`;
+
+        try {
+            boxElement.innerText = "Analisi in corso da parte dell'IA...";
+            
+            const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+            });
+            
+            const data = await response.json();
+            const consiglioVero = data.candidates[0].content.parts[0].text;
+            
+            // Mostra il consiglio generato da Gemini
+            boxElement.innerText = consiglioVero;
+
+        } catch (error) {
+            console.warn("Connessione assente o errore API, fallback sulla simulazione locale.", error);
+            // 4. Fallback in caso di assenza di rete: se la chiamata fallisce, usa la simulazione
+            calcolaConsiglioSimulato(speseList, budgetTotale, boxElement);
+        }
+        }
+
+        // Funzione di simulazione/fallback offline basata sulle tue spese reali
+        function calcolaConsiglioSimulato(speseList, budgetTotale, element) {
+        const spesaTotale = speseList.reduce((acc, curr) => acc + curr.amount, 0);
+        
+        // Raggruppa per categoria per trovare dove si spende di più
+        const categorie = {};
+        speseList.forEach(s => {
+            categorie[s.category] = (categorie[s.category] || 0) + s.amount;
+        });
+        
+        let catPiuCostosa = "Varie";
+        let maxSpesa = 0;
+        for (let cat in categorie) {
+            if (categorie[cat] > maxSpesa) {
+            maxSpesa = categorie[cat];
+            catPiuCostosa = cat;
+            }
+        }
+
+        // Restituisce un consiglio simulato ma dinamico in base alle spese registrate
+        if (spesaTotale > (budgetTotale * 0.7)) {
+            element.innerText = `Attenzione: hai quasi esaurito il budget (${spesaTotale.toFixed(2)}€). Cerca di limitare le spese nella categoria ${catPiuCostosa}.`;
+        } else {
+            element.innerText = `Ottimo ritmo! La voce più alta al momento è ${catPiuCostosa} (${maxSpesa.toFixed(2)}€). Puoi risparmiare ancora circa 45,00€/mese tagliando i piccoli sfizi.`;
+        }
+    }
     </script>
 </body>
 </html>
